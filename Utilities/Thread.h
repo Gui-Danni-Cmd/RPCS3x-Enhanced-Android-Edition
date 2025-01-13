@@ -33,7 +33,8 @@ enum class thread_state : u32
 	aborting = 1, // The thread has been joined in the destructor or explicitly aborted
 	errored = 2, // Set after the emergency_exit call
 	finished = 3,  // Final state, always set at the end of thread execution
-	mask = 3
+	mask = 3,
+	destroying_context = 7, // Special value assigned to destroy data explicitly before the destructor
 };
 
 template <class Context>
@@ -172,9 +173,9 @@ private:
 	friend class named_thread;
 
 protected:
-	thread_base(native_entry, std::string name);
+	thread_base(native_entry, std::string name) noexcept;
 
-	~thread_base();
+	~thread_base() noexcept;
 
 public:
 	// Get CPU cycles since last time this function was called. First call returns 0.
@@ -351,7 +352,7 @@ public:
 	// Sets the native thread priority and returns it to zero at destructor
 	struct scoped_priority
 	{
-		explicit scoped_priority(int prio)
+		explicit scoped_priority(int prio) noexcept
 		{
 			set_native_priority(prio);
 		}
@@ -360,7 +361,7 @@ public:
 
 		scoped_priority& operator=(const scoped_priority&) = delete;
 
-		~scoped_priority()
+		~scoped_priority() noexcept
 		{
 			set_native_priority(0);
 		}
@@ -388,7 +389,7 @@ class thread_future_t : public thread_future, result_storage<Ctx, std::condition
 	using future = thread_future_t;
 
 public:
-	thread_future_t(Ctx&& func, Args&&... args)
+	thread_future_t(Ctx&& func, Args&&... args) noexcept
 		: m_args(std::forward<Args>(args)...)
 		, m_func(std::forward<Ctx>(func))
 	{
@@ -417,7 +418,7 @@ public:
 		};
 	}
 
-	~thread_future_t()
+	~thread_future_t() noexcept
 	{
 		if constexpr (!future::empty && !Discard)
 		{
@@ -570,7 +571,7 @@ public:
 	named_thread& operator=(const named_thread&) = delete;
 
 	// Wait for the completion and access result (if not void)
-	[[nodiscard]] decltype(auto) operator()()
+	[[nodiscard]] decltype(auto) operator()() noexcept
 	{
 		thread::join();
 
@@ -581,7 +582,7 @@ public:
 	}
 
 	// Wait for the completion and access result (if not void)
-	[[nodiscard]] decltype(auto) operator()() const
+	[[nodiscard]] decltype(auto) operator()() const noexcept
 	{
 		thread::join();
 
@@ -593,7 +594,7 @@ public:
 
 	// Send command to the thread to invoke directly (references should be passed via std::ref())
 	template <bool Discard = true, typename Arg, typename... Args>
-	auto operator()(Arg&& arg, Args&&... args)
+	auto operator()(Arg&& arg, Args&&... args) noexcept
 	{
 		// Overloaded operator() of the Context.
 		constexpr bool v1 = std::is_invocable_v<Context, Arg&&, Args&&...>;
@@ -667,12 +668,12 @@ public:
 	}
 
 	// Access thread state
-	operator thread_state() const
+	operator thread_state() const noexcept
 	{
 		return static_cast<thread_state>(thread::m_sync.load() & 3);
 	}
 
-	named_thread& operator=(thread_state s)
+	named_thread& operator=(thread_state s) noexcept
 	{
 		if (s == thread_state::created)
 		{
@@ -693,7 +694,7 @@ public:
 
 		if constexpr (std::is_assignable_v<Context&, thread_state>)
 		{
-			static_cast<Context&>(*this) = s;
+			static_cast<Context&>(*this) = thread_state::aborting;
 		}
 
 		if (notify_sync)
@@ -702,17 +703,25 @@ public:
 			thread::m_sync.notify_all();
 		}
 
-		if (s == thread_state::finished)
+		if (s == thread_state::finished || s == thread_state::destroying_context)
 		{
 			// This participates in emulation stopping, use destruction-alike semantics
 			thread::join(true);
+		}
+
+		if (s == thread_state::destroying_context)
+		{
+			if constexpr (std::is_assignable_v<Context&, thread_state>)
+			{
+				static_cast<Context&>(*this) = thread_state::destroying_context;
+			}
 		}
 
 		return *this;
 	}
 
 	// Context type doesn't need virtual destructor
-	~named_thread()
+	~named_thread() noexcept
 	{
 		// Assign aborting state forcefully and join thread
 		operator=(thread_state::finished);

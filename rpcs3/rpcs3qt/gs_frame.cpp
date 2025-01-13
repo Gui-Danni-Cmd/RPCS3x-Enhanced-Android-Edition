@@ -10,6 +10,7 @@
 #include "Emu/system_config.h"
 #include "Emu/system_progress.hpp"
 #include "Emu/IdManager.h"
+#include "Emu/Audio/audio_utils.h"
 #include "Emu/Cell/Modules/cellScreenshot.h"
 #include "Emu/Cell/Modules/cellVideoOut.h"
 #include "Emu/Cell/Modules/cellAudio.h"
@@ -72,6 +73,7 @@ gs_frame::gs_frame(QScreen* screen, const QRect& geometry, const QIcon& appIcon,
 	, m_initial_geometry(geometry)
 	, m_gui_settings(std::move(gui_settings))
 	, m_start_games_fullscreen(force_fullscreen)
+	, m_renderer(g_cfg.video.renderer)
 {
 	load_gui_settings();
 
@@ -327,6 +329,9 @@ void gs_frame::handle_shortcut(gui::shortcuts::shortcut shortcut_key, const QKey
 				{
 					Emu.Restart();
 				};
+
+				// Make sure we keep the game window opened
+				Emu.SetContinuousMode(true);
 			}
 
 			Emu.Kill(false, true);
@@ -356,6 +361,21 @@ void gs_frame::handle_shortcut(gui::shortcuts::shortcut shortcut_key, const QKey
 	case gui::shortcuts::shortcut::gw_home_menu:
 	{
 		pad::g_home_menu_requested = true;
+		break;
+	}
+	case gui::shortcuts::shortcut::gw_mute_unmute:
+	{
+		audio::toggle_mute();
+		break;
+	}
+	case gui::shortcuts::shortcut::gw_volume_up:
+	{
+		audio::change_volume(5);
+		break;
+	}
+	case gui::shortcuts::shortcut::gw_volume_down:
+	{
+		audio::change_volume(-5);
 		break;
 	}
 	default:
@@ -586,6 +606,11 @@ void gs_frame::close()
 
 	gui_log.notice("Closing game window");
 
+	if (m_ignore_stop_events)
+	{
+		return;
+	}
+
 	Emu.CallFromMainThread([this]()
 	{
 		// Hide window if necessary
@@ -605,6 +630,10 @@ void gs_frame::close()
 			deleteLater();
 		}
 	});
+}
+
+void gs_frame::reset()
+{
 }
 
 bool gs_frame::shown()
@@ -1117,6 +1146,11 @@ bool gs_frame::event(QEvent* ev)
 		}
 
 		gui_log.notice("Game window close event issued");
+
+		if (m_ignore_stop_events)
+		{
+			return QWindow::event(ev);
+		}
 
 		if (Emu.IsStopped())
 		{

@@ -165,8 +165,8 @@ private:
 		case localized_string_id::CELL_SAVEDATA_DELETE: return tr("Delete this data?\n\n%0", "Savedata entry info").arg(std::forward<Args>(args)...);
 		case localized_string_id::CELL_SAVEDATA_LOAD: return tr("Load this data?\n\n%0", "Savedata entry info").arg(std::forward<Args>(args)...);
 		case localized_string_id::CELL_SAVEDATA_OVERWRITE: return tr("Do you want to overwrite the saved data?\n\n%0", "Savedata entry info").arg(std::forward<Args>(args)...);
-		case localized_string_id::CELL_SAVEDATA_AUTOSAVE: return tr("Saving");
-		case localized_string_id::CELL_SAVEDATA_AUTOLOAD: return tr("Loading");
+		case localized_string_id::CELL_SAVEDATA_AUTOSAVE: return tr("Saving...");
+		case localized_string_id::CELL_SAVEDATA_AUTOLOAD: return tr("Loading...");
 		case localized_string_id::CELL_CROSS_CONTROLLER_MSG: return tr("Start [%0] on the PS Vita system.\nIf you have not installed [%0], go to [Remote Play] on the PS Vita system and start [Cross-Controller] from the LiveArea™ screen.", "Cross-Controller message").arg(std::forward<Args>(args)...);
 		case localized_string_id::CELL_CROSS_CONTROLLER_FW_MSG: return tr("If your system software version on the PS Vita system is earlier than 1.80, you must update the system software to the latest version.", "Cross-Controller firmware message");
 		case localized_string_id::CELL_NP_RECVMESSAGE_DIALOG_TITLE: return tr("Select Message", "RECVMESSAGE_DIALOG");
@@ -292,6 +292,19 @@ private:
 		case localized_string_id::HOME_MENU_SAVESTATE_AND_EXIT: return tr("Save Emulation State And Exit");
 		case localized_string_id::HOME_MENU_RELOAD_SAVESTATE: return tr("Reload Last Emulation State");
 		case localized_string_id::HOME_MENU_RECORDING: return tr("Start/Stop Recording");
+		case localized_string_id::HOME_MENU_TROPHIES: return tr("Trophies");
+		case localized_string_id::HOME_MENU_TROPHY_LIST_TITLE: return tr("Trophy Progress: %0").arg(std::forward<Args>(args)...);
+		case localized_string_id::HOME_MENU_TROPHY_LOCKED_TITLE: return tr("Locked trophy: %0").arg(std::forward<Args>(args)...);
+		case localized_string_id::HOME_MENU_TROPHY_HIDDEN_TITLE: return tr("Hidden trophy");
+		case localized_string_id::HOME_MENU_TROPHY_HIDDEN_DESCRIPTION: return tr("This trophy is hidden");
+		case localized_string_id::HOME_MENU_TROPHY_PLATINUM_RELEVANT: return tr("Platinum relevant");
+		case localized_string_id::HOME_MENU_TROPHY_GRADE_BRONZE: return tr("Bronze", "Trophy type");
+		case localized_string_id::HOME_MENU_TROPHY_GRADE_SILVER: return tr("Silver", "Trophy type");
+		case localized_string_id::HOME_MENU_TROPHY_GRADE_GOLD: return tr("Gold", "Trophy type");
+		case localized_string_id::HOME_MENU_TROPHY_GRADE_PLATINUM: return tr("Platinum", "Trophy type");
+		case localized_string_id::AUDIO_MUTED: return tr("Audio muted", "Audio");
+		case localized_string_id::AUDIO_UNMUTED: return tr("Audio unmuted", "Audio");
+		case localized_string_id::AUDIO_CHANGED: return tr("Volume changed to %0", "Audio").arg(std::forward<Args>(args)...);
 		case localized_string_id::PROGRESS_DIALOG_PROGRESS: return tr("Progress:");
 		case localized_string_id::PROGRESS_DIALOG_PROGRESS_ANALYZING: return tr("Progress: analyzing...");
 		case localized_string_id::PROGRESS_DIALOG_REMAINING: return tr("remaining");
@@ -301,6 +314,7 @@ private:
 		case localized_string_id::PROGRESS_DIALOG_OF: return tr("of");
 		case localized_string_id::PROGRESS_DIALOG_PLEASE_WAIT: return tr("Please wait");
 		case localized_string_id::PROGRESS_DIALOG_STOPPING_PLEASE_WAIT: return tr("Stopping. Please wait...");
+		case localized_string_id::PROGRESS_DIALOG_SAVESTATE_PLEASE_WAIT: return tr("Creating savestate. Please wait...");
 		case localized_string_id::PROGRESS_DIALOG_SCANNING_PPU_EXECUTABLE: return tr("Scanning PPU Executable...");
 		case localized_string_id::PROGRESS_DIALOG_ANALYZING_PPU_EXECUTABLE: return tr("Analyzing PPU Executable...");
 		case localized_string_id::PROGRESS_DIALOG_SCANNING_PPU_MODULES: return tr("Scanning PPU Modules...");

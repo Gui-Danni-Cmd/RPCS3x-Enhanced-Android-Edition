@@ -125,6 +125,7 @@ target_sources(rpcs3_emu PRIVATE
 # Audio
 target_sources(rpcs3_emu PRIVATE
     Audio/audio_resampler.cpp
+    Audio/audio_utils.cpp
     Audio/AudioDumper.cpp
     Audio/AudioBackend.cpp
     Audio/Cubeb/CubebBackend.cpp
@@ -171,6 +172,7 @@ target_link_libraries(rpcs3_emu
 
 # Cell
 target_sources(rpcs3_emu PRIVATE
+    Cell/ErrorCodes.cpp
     Cell/MFC.cpp
     Cell/PPUAnalyser.cpp
     Cell/PPUDisAsm.cpp
@@ -476,6 +478,7 @@ target_sources(rpcs3_emu PRIVATE
     RSX/Common/TextureUtils.cpp
     RSX/Common/texture_cache.cpp
     RSX/Core/RSXContext.cpp
+    RSX/Core/RSXDrawCommands.cpp
     RSX/gcm_enums.cpp
     RSX/gcm_printing.cpp
     RSX/GL/GLCommonDecompiler.cpp
@@ -527,6 +530,7 @@ target_sources(rpcs3_emu PRIVATE
     RSX/Overlays/HomeMenu/overlay_home_menu_savestate.cpp
     RSX/Overlays/Network/overlay_recvmessage_dialog.cpp
     RSX/Overlays/Network/overlay_sendmessage_dialog.cpp
+    RSX/Overlays/Trophies/overlay_trophy_list_dialog.cpp
     RSX/Overlays/overlays.cpp
     RSX/Overlays/overlay_animated_icon.cpp
     RSX/Overlays/overlay_animation.cpp
@@ -554,6 +558,7 @@ target_sources(rpcs3_emu PRIVATE
     RSX/Program/CgBinaryFragmentProgram.cpp
     RSX/Program/CgBinaryVertexProgram.cpp
     RSX/Program/FragmentProgramDecompiler.cpp
+    RSX/Program/FragmentProgramRegister.cpp
     RSX/Program/GLSLCommon.cpp
     RSX/Program/ProgramStateCache.cpp
     RSX/Program/program_util.cpp

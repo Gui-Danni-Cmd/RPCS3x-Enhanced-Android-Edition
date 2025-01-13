@@ -57,17 +57,9 @@ void lv2_socket_native::save(utils::serial& ar)
 	ar(is_socket_connected());
 }
 
-lv2_socket_native::~lv2_socket_native()
+lv2_socket_native::~lv2_socket_native() noexcept
 {
-	std::lock_guard lock(mutex);
-	if (socket)
-	{
-#ifdef _WIN32
-		::closesocket(socket);
-#else
-		::close(socket);
-#endif
-	}
+	lv2_socket_native::close();
 }
 
 s32 lv2_socket_native::create_socket()
@@ -1114,10 +1106,12 @@ void lv2_socket_native::close()
 		socket = {};
 	}
 
-	auto& dnshook = g_fxo->get<np::dnshook>();
-	dnshook.remove_dns_spy(lv2_id);
+	if (auto dnshook = g_fxo->try_get<np::dnshook>())
+	{
+		dnshook->remove_dns_spy(lv2_id);
+	}
 
-	if (bound_port)
+	if (bound_port && g_fxo->is_init<named_thread<np::np_handler>>())
 	{
 		auto& nph = g_fxo->get<named_thread<np::np_handler>>();
 		nph.upnp_remove_port_mapping(bound_port, type == SYS_NET_SOCK_STREAM ? "TCP" : "UDP");
